@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-service
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: products-service
+  template:
+    metadata:
+      labels:
+        app: products-service
+    spec:
+      containers:
+      - name: products-service
+        image: parikshit1212/products-service:v1
+        ports:
+        - containerPort: 5002
+        env:
+        - name: MONGO_URI
+          value: mongodb://database:27017/shopdb

@@ -1,0 +1,65 @@
+# Kubernetes API ka version jo Ingress resource ke liye use ho raha hai
+apiVersion: networking.k8s.io/v1
+# Bata raha hai ki ye kis type ka object/resource hai (Yahan ye Ingress hai)
+kind: Ingress
+
+# Metadata me resource ki pehchan (Identity) hoti hai
+metadata:
+  name: shop-ingress       # Is Ingress controller ka naam 'shop-ingress' rakha hai
+  namespace: production    # Ye Ingress sirf 'production' naam ke namespace me kaam karega
+
+# Spec ke andar hum actual routing rules define karte hain
+spec:
+  # Bata raha hai ki isko handle karne ke liye 'nginx' Ingress Controller ka use karna hai
+  ingressClassName: nginx
+
+  # Yahan se traffic ke rules shuru hote hain
+  rules:
+  - host: myshoppakshya.mooo.com   # Agar request is specific domain se aayegi tabhi ye rules apply honge
+    http:
+      paths:
+
+      # 1. Frontend Route (Home Page)
+      - path: /                   # Agar user sirf main domain par aayega (e.g., myshoppakshya.mooo.com/)
+        pathType: Prefix          # Prefix ka matlab iske aage ka kuch bhi (jaise /about, /contact) isi rule me aayega
+        backend:
+          service:
+            name: frontend        # Traffic ko 'frontend' naam ke Kubernetes Service par bhej do
+            port:
+              number: 80          # Aur wo service port 80 par listen kar rahi hai
+
+      # 2. Authentication API Route
+      - path: /api/auth           # Agar URL me '/api/auth' hoga (e.g., login/signup ke liye)
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service    # Traffic jayega 'auth-service' microservice ke paas
+            port:
+              number: 5001        # Jo port 5001 par chal rahi hai
+
+      # 3. Products API Route
+      - path: /api/products       # Agar user products dekh raha hai (/api/products)
+        pathType: Prefix
+        backend:
+          service:
+            name: products-service # Traffic jayega 'products-service' ke paas
+            port:
+              number: 5002        # Jo port 5002 par chal rahi hai
+
+      # 4. Cart API Route
+      - path: /api/cart           # Agar user cart check kar raha hai (/api/cart)
+        pathType: Prefix
+        backend:
+          service:
+            name: cart-service    # Traffic jayega 'cart-service' ke paas
+            port:
+              number: 5003        # Jo port 5003 par chal rahi hai
+
+      # 5. Orders API Route
+      - path: /api/orders         # Agar user checkout ya order history dekh raha hai (/api/orders)
+        pathType: Prefix
+        backend:
+          service:
+            name: orders-service  # Traffic jayega 'orders-service' ke paas
+            port:
+              number: 5004        # Jo port 5004 par chal rahi hai

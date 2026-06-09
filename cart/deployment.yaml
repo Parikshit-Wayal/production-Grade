@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+      - name: cart-service
+        image: parikshit1212/cart-service:v1
+        ports:
+        - containerPort: 5003
+        env:
+        - name: MONGO_URI
+          value: mongodb://database:27017/shopdb
