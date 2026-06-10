@@ -44,23 +44,112 @@ To capture the holistic view of traffic patterns, deployment pipelines, data man
 ---
 ## 🧩 Step 2: Decoupling the Monolith into a Distributed Microservices Architecture
 
-Transitioning from a legacy monolithic design to a cloud-native model requires breaking apart single-binary dependencies into loosely coupled, bounded contexts. For **MINIMAL.SHOP**, the backend domain was split into five specialized, independent microservices to enable isolated development cycles, independent scaling boundaries, and fault isolation.
+As the application grew, a monolithic architecture would have made deployments, scaling, and maintenance increasingly difficult. To align with cloud-native principles, **MINIMAL.SHOP** was re-architected into a collection of independent microservices, each responsible for a specific business capability.
 
-Below is the conceptual blueprint of the decoupled service domains, structural environment mappings, and database integration layer:
+This decomposition enables:
 
-<img width="1180" height="927" alt="deicouple-conf-files" src="https://github.com/user-attachments/assets/b2b9d1b8-60f6-4207-ac78-88cdfaf16d2e" />
-
+- Independent service deployments.
+- Better fault isolation.
+- Granular scaling of individual workloads.
+- Improved maintainability and development velocity.
+- Seamless integration with Kubernetes and GitOps workflows.
 
 ---
 
-### 1. Functional Microservices Breakdown
-Every service operates as an isolated application layer with its own dedicated dependencies, packaged inside lightweight Docker containers:
+### Application Features
 
-* **`frontend` (React):** The client-facing user interface. It is served via an NGINX static file server inside the cluster and handles dynamic web requests by communicating directly with the backend APIs via public ingress routes.
-* **`auth-service` (Node.js/Express):** Manages user registration, session validation, and secure JWT (JSON Web Token) generation and parsing.
-* **`products-service` (Node.js/Express):** Acts as the catalog engine. It manages product listings, item descriptions, pricing, and metadata.
-* **`cart-service` (Node.js/Express):** Handles stateful, temporary user sessions containing active shopping carts and item quantities before checkout processing.
-* **`orders-service` (Node.js/Express):** Manages the checkout state machine, permanent order placement records, and histories.
+The following screenshots showcase the major functionalities provided by the microservices-based platform.
+
+#### Shopping Cart
+
+Managed by the Cart Service, responsible for maintaining user cart state and item quantities.
+
+<br>
+
+<img width="934" height="448" alt="32-shop-cart-page" src="https://github.com/user-attachments/assets/29355845-9237-410e-be55-e2214bffa600" />
+
+---
+
+#### Order Management
+
+Handled by the Orders Service, which manages order placement and purchase history.
+
+<br>
+
+<img width="925" height="256" alt="33-shop-orders-page" src="https://github.com/user-attachments/assets/5e27dcff-13b8-49ea-87cd-8d83317fed51" />
+
+---
+
+#### User Authentication
+
+Managed by the Authentication Service, providing secure login, registration, and JWT-based authentication.
+
+<br>
+
+<img width="957" height="682" alt="35-shop-login-page" src="https://github.com/user-attachments/assets/43fc24d7-19c2-4552-bf81-9ed87d643fe2" />
+
+---
+
+#### Product & Inventory Management
+
+Provided by the Products Service, responsible for catalog and inventory operations.
+
+<br>
+
+<img width="941" height="309" alt="34-shop-admin-inventory-page" src="https://github.com/user-attachments/assets/0aeeded8-ae92-47ed-8e8d-5084350ad766" />
+
+---
+
+### Microservices Architecture Overview
+
+The diagram below illustrates the separation of services, configuration management, and database integration across the platform.
+
+<br>
+
+<img width="1180" height="927" alt="deicouple-conf-files" src="https://github.com/user-attachments/assets/b2b9d1b8-60f6-4207-ac78-88cdfaf16d2e" />
+
+---
+
+### Functional Microservices Breakdown
+
+Each service is packaged and deployed independently inside Kubernetes containers.
+
+| Service | Responsibility |
+|----------|---------------|
+| **frontend** | React-based user interface served through NGINX. |
+| **auth-service** | User registration, authentication, and JWT management. |
+| **products-service** | Product catalog, pricing, and inventory management. |
+| **cart-service** | Shopping cart operations and temporary user cart state. |
+| **orders-service** | Checkout workflows, order creation, and order history. |
+
+---
+
+### Service Communication Flow
+
+```text
+Frontend
+   │
+   ├── Auth Service
+   ├── Products Service
+   ├── Cart Service
+   └── Orders Service
+```
+
+The frontend interacts with each backend service through dedicated REST APIs, ensuring clear separation of responsibilities across the application.
+
+---
+
+### Outcome
+
+By decomposing the monolithic application into independent microservices, the platform gained:
+
+- Better scalability.
+- Independent deployment cycles.
+- Improved fault isolation.
+- Easier maintenance and troubleshooting.
+- A solid foundation for Kubernetes-based orchestration and cloud-native operations.
+
+This architecture enables each business domain to evolve and scale independently while maintaining a cohesive user experience.
 
 ---
 
@@ -116,6 +205,14 @@ To bridge public internet traffic to our AWS cluster gateway, custom dynamic Typ
 
 * **E-Commerce Application URL:** `myshoppakshya.mooo.com`
 * **GitOps Dashboard URL:** `argocd-pakshya.mooo.com`
+
+<img width="828" height="423" alt="01-argocd-https-certificate" src="https://github.com/user-attachments/assets/c2a20dd6-f460-4703-8042-8c7c65c105fd" />
+
+<br>
+<br>
+<img width="957" height="807" alt="37-docker-images-versioning" src="https://github.com/user-attachments/assets/12c3c5a6-a441-40bc-8b9f-8b959124d766" />
+
+<br>
 
 Below is the active DNS zones panel routing configuration:
 
@@ -316,6 +413,11 @@ Healthy Cert-Manager pods indicate that:
 
 <br>
 
+<img width="1109" height="875" alt="04-cert-manager-certificate-details" src="https://github.com/user-attachments/assets/44f2b310-3ee5-452f-a6d1-fef2d5a0bd57" />
+
+<br>
+<br>
+
 <img width="1102" height="228" alt="05-cert-manager-pods-running" src="https://github.com/user-attachments/assets/6b1b365f-4f9a-4b4f-8a87-42d442cdd000" />
 
 ---
@@ -341,30 +443,227 @@ At this stage, the production environment has a fully functional Layer-7 routing
 
 ## 📈 Step 5: High Availability Validation & Dynamic Scaling (HPA & Metrics Server)
 
-To handle unexpected traffic spikes without manual operations, the system relies on automated workload elasticity. This section documents configuring the core cluster metrics aggregation plane and establishing Horizontal Pod Autoscalers (HPA) to scale microservice replicas dynamically based on resource constraints.
+In a production environment, application traffic is rarely constant. User activity can fluctuate significantly due to peak usage hours, marketing campaigns, seasonal demand, or unexpected traffic spikes. To ensure the platform remains responsive and highly available under varying workloads, Kubernetes provides **Horizontal Pod Autoscaling (HPA)**.
+
+The HPA continuously monitors resource utilization and automatically adjusts the number of running pod replicas based on predefined scaling policies. This eliminates the need for manual intervention while ensuring efficient resource consumption and application availability.
+
+To enable autoscaling, Kubernetes requires a centralized metrics collection component known as the **Metrics Server**.
+
+---
+
+### Why Horizontal Pod Autoscaling?
+
+Without autoscaling:
+
+- Traffic spikes can overwhelm application pods.
+- Response times increase under heavy load.
+- Services may become unavailable due to resource exhaustion.
+- Manual scaling operations become operationally expensive.
+
+With HPA enabled:
+
+- Pods automatically scale out during increased demand.
+- Pods scale back in when traffic decreases.
+- Cluster resources are utilized more efficiently.
+- Applications remain highly available and resilient.
+
+---
+
+### High-Level Autoscaling Architecture
+
+The following workflow illustrates how Kubernetes performs dynamic scaling:
+
+```text
+Application Traffic
+        │
+        ▼
+    Application Pods
+        │
+        ▼
+    Kubelet Metrics
+        │
+        ▼
+    Metrics Server
+        │
+        ▼
+Horizontal Pod Autoscaler
+        │
+        ▼
+Adjust Replica Count
+        │
+        ▼
+Scale Up / Scale Down Pods
+```
+
+The Metrics Server collects resource usage data from every node's kubelet and exposes those metrics through the Kubernetes Metrics API. The HPA then evaluates this data and automatically adjusts deployment replica counts based on configured thresholds.
 
 ---
 
 ### 1. Deploying the Kubernetes Metrics Server
-The Horizontal Pod Autoscaler relies on the cluster-resident **Metrics Server** to collect resource usage telemetry (CPU and Memory dimensions) from container runtimes via local kubelets. 
 
-Because our multi-node cluster uses self-signed control-plane certificates via `kubeadm`, the standard Metrics Server manifest must be adjusted to bypass TLS validation metrics temporarily during internal scraping:
+The **Metrics Server** is a cluster-wide component responsible for aggregating CPU and memory usage metrics from Kubernetes nodes and pods.
+
+These metrics are consumed by:
+
+- Horizontal Pod Autoscalers (HPA)
+- `kubectl top` commands
+- Resource monitoring workflows
+- Kubernetes resource optimization processes
+
+Since this cluster was provisioned using **kubeadm** with self-signed certificates, the default Metrics Server deployment requires a small modification to allow communication with kubelets using insecure TLS validation.
+
+---
+
+#### Installing Metrics Server
+
+Download the latest stable Metrics Server manifest:
 
 ```bash
-# Download the official stable metrics server release components
-wget [https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml](https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml)
-
-# Modify the container arguments to include --kubelet-insecure-tls for local authorization
-# Apply the updated manifest to the cluster
-kubectl apply -f components.yaml
-
+wget https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
+
+Modify the deployment arguments to include:
+
+```yaml
+- --kubelet-insecure-tls
+```
+
+This flag allows Metrics Server to collect node metrics successfully in environments where kubelet certificates are not signed by a publicly trusted certificate authority.
+
+Apply the updated manifest:
+
+```bash
+kubectl apply -f components.yaml
+```
+
+After deployment, Kubernetes creates the Metrics Server resources and begins collecting cluster-wide resource utilization data.
+
+---
+
+### Verifying Metrics Server Deployment
+
+The following output confirms that the Metrics Server deployment is running successfully within the cluster.
+
+A healthy Metrics Server deployment indicates that Kubernetes can collect real-time CPU and memory utilization metrics required for autoscaling decisions.
+
+<br>
+
+<img width="1120" height="447" alt="19-metrics-server-and-resource-usage" src="https://github.com/user-attachments/assets/8163fa16-f0cf-411e-963a-e503358e3ddd" />
+
+---
+
+### Validating Cluster Resource Metrics
+
+Once Metrics Server is operational, resource utilization can be queried using:
+
+```bash
+kubectl top nodes
+
+kubectl top pods -n production
+```
+
+These commands provide real-time visibility into:
+
+- Node CPU utilization
+- Node memory consumption
+- Pod-level resource usage
+- Overall cluster health
+
+The successful retrieval of these metrics confirms that the Metrics API is functioning correctly.
+
+<br>
+
+<img width="974" height="114" alt="39-production-ingress-routing" src="https://github.com/user-attachments/assets/ca6d4884-b3b6-4c1f-88db-cc26b6ebf960" />
+
+---
+
+### 2. Configuring Horizontal Pod Autoscaling (HPA)
+
+After enabling Metrics Server, Horizontal Pod Autoscalers can be attached to application deployments.
+
+An HPA continuously monitors deployment resource utilization and dynamically adjusts replica counts based on configured thresholds.
+
+For example:
+
+```yaml
+minReplicas: 2
+maxReplicas: 10
+
+targetCPUUtilizationPercentage: 70
+```
+
+Scaling behavior:
+
+- CPU utilization below 70% → No scaling action.
+- CPU utilization exceeds 70% → Additional pods are created.
+- Traffic decreases → Excess replicas are automatically removed.
+
+This ensures that the application maintains performance while minimizing unnecessary infrastructure costs.
+
+---
+
+### Verifying Horizontal Pod Autoscaler Status
+
+The following command displays active autoscalers and their current scaling status:
+
+```bash
+kubectl get hpa -n production
+```
+
+The output provides:
+
+- Current replica count
+- Target CPU utilization
+- Minimum replicas
+- Maximum replicas
+- Current scaling state
+
+This confirms that Kubernetes is actively monitoring workloads and can automatically react to changing resource demands.
+
+<br>
+
+<img width="1116" height="178" alt="17-horizontal-pod-autoscaler-status" src="https://github.com/user-attachments/assets/e032a394-7e61-4463-8938-261cc767477b" />
+
+---
+
+### Autoscaling Demonstration
+
+<img width="1037" height="270" alt="16-load-generator-for-hpa-testing" src="https://github.com/user-attachments/assets/d35f3341-3328-4264-bdf9-70b9adcac3b2" />
+
+
+
+To validate the HPA configuration, a workload was generated against the application services.
+
+As CPU utilization increased:
+
+1. Metrics Server collected updated resource metrics.
+2. HPA detected utilization above the configured threshold.
+3. Kubernetes automatically increased the deployment replica count.
+4. Incoming traffic was distributed across newly created pods.
+5. Application responsiveness remained stable despite increased load.
+
+Once the load subsided, Kubernetes automatically scaled the deployment back down to conserve cluster resources.
+
+The screenshot below demonstrates the autoscaling process in action.
+
+<br>
+
 <img width="1074" height="564" alt="03-hpa-autoscaling-demonstration" src="https://github.com/user-attachments/assets/da2d850d-35c0-46eb-87f6-742e31234a4c" />
 
+---
 
+### Outcome
 
+At this stage, the Kubernetes platform provides automated workload elasticity and high availability capabilities:
 
+- Metrics Server continuously collects cluster resource metrics.
+- Horizontal Pod Autoscalers monitor application utilization.
+- Pods automatically scale out during traffic spikes.
+- Pods scale back in during periods of low demand.
+- Application availability is maintained without manual intervention.
+- Infrastructure resources are utilized efficiently.
 
+This implementation ensures that the microservices platform can dynamically adapt to changing traffic patterns while maintaining performance, reliability, and operational efficiency.
 
 
 
