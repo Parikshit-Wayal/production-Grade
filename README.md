@@ -48,7 +48,8 @@ Transitioning from a legacy monolithic design to a cloud-native model requires b
 
 Below is the conceptual blueprint of the decoupled service domains, structural environment mappings, and database integration layer:
 
-<img width="1115" height="525" alt="microarchi-dicouple" src="https://github.com/user-attachments/assets/145d2e57-5daa-4be3-9a08-32297c07378b" />
+<img width="1180" height="927" alt="deicouple-conf-files" src="https://github.com/user-attachments/assets/b2b9d1b8-60f6-4207-ac78-88cdfaf16d2e" />
+
 
 ---
 
@@ -70,7 +71,34 @@ This version management strategy ensures that the GitOps controller can execute 
 
 Here is the verified list of custom versioned images stored on Docker Hub ready for cluster deployment:
 
-![Docker Hub Image Versioning](images/37-docker-images-versioning.png)
+<img width="717" height="361" alt="images-docker" src="https://github.com/user-attachments/assets/2c320ba0-7750-48bf-9d93-8b343339248e" />
+<br>
+<br>
+<br>
+<img width="999" height="176" alt="38-kubernetes-node-resource-usage" src="https://github.com/user-attachments/assets/02cb080e-2d3f-4924-ac18-534f9b3ac558" />
 
 ---
+## 🚀 Step 3: Declarative Application Deployments & Internal Service Networking
+
+With the microservices split into distinct codebases and their container versions pushed to Docker Hub, the next phase is establishing their runtime state within the cluster. This is managed under the dedicated `production` namespace using zero-downtime `Deployment` policies and stable internal `ClusterIP` network abstractions.
+
+---
+
+### 1. Pod Replica Configuration & Deployment Strategy
+Each stateless microservice deployment (such as `auth-service`, `cart-service`, `products-service`, and `orders-service`) is configured with a baseline of **3 replicas** distributed across the cluster nodes to ensure high availability. 
+<br>
+
+<img width="951" height="213" alt="41-auth-service-environment-variables" src="https://github.com/user-attachments/assets/dfb6fd90-4987-4215-b5ce-b13a4d561adc" />
+
+<br>
+#### Sample Core Manifest Design (`auth/deployment.yaml`) and (auth/service.yml)
+To give insight into the structural setup, the services utilize specific environment bindings to talk to the unified data tier safely:
+
+<img width="706" height="789" alt="-n production" src="https://github.com/user-attachments/assets/261aaa58-9a5c-4573-b501-b342a92f811a" />
+<br>
+<br>
+<br>
+<img width="1115" height="525" alt="microarchi-dicouple" src="https://github.com/user-attachments/assets/c4ead85d-394c-4178-a059-e2b5b1c1836c" />
+<br>
+
 
