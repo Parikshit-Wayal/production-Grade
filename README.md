@@ -666,9 +666,117 @@ At this stage, the Kubernetes platform provides automated workload elasticity an
 This implementation ensures that the microservices platform can dynamically adapt to changing traffic patterns while maintaining performance, reliability, and operational efficiency.
 
 
+# 👁️ Step 6: Monitoring & Observability with New Relic
 
+To gain visibility into the health and performance of the Kubernetes cluster, **New Relic** was integrated using the official guided Kubernetes installation. This provides centralized monitoring for cluster resources, nodes, pods, workloads, and log ingestion without requiring manual instrumentation of individual services.
 
+The integration enables:
 
+- Cluster-wide infrastructure monitoring
+- Kubernetes workload visibility
+- Centralized log aggregation
+- Node and pod performance metrics
+- Real-time health dashboards
+- Faster troubleshooting and incident analysis
+
+---
+
+## New Relic Integration
+
+After creating a New Relic account, the Kubernetes integration was installed using the **guided setup provided by New Relic**. The installation automatically deployed the required agents and monitoring components into a dedicated namespace within the cluster.
+
+The deployment included:
+
+- New Relic Infrastructure Agent
+- Kubernetes Integration
+- Log Forwarding Agent
+- Cluster Metadata Collection
+- Node and Pod Monitoring
+
+### Verifying New Relic Components
+
+The following output confirms that all New Relic monitoring components were successfully deployed and running inside the cluster.
+
+<img width="951" height="340" alt="22-newrelic-pods-running" src="https://github.com/user-attachments/assets/25a73752-f4cb-4469-94ee-0a3688b12522" />
+
+---
+
+## Kubernetes Cluster Monitoring
+
+Once connected, New Relic automatically discovered the Kubernetes environment and began collecting metrics from:
+
+- Worker nodes
+- Control plane components
+- Deployments
+- Pods
+- Services
+- Namespaces
+
+The cluster overview dashboard provides a centralized view of resource utilization, workload health, and overall cluster status.
+
+<img width="1919" height="975" alt="25-newrelic-cluster-overview-dashboard" src="https://github.com/user-attachments/assets/e979deb9-e76d-4b02-aba3-c58b6f21ad35" />
+
+---
+
+## Infrastructure Monitoring
+
+New Relic continuously tracks infrastructure-level metrics including:
+
+- CPU utilization
+- Memory consumption
+- Network throughput
+- Disk usage
+- Node health
+
+This provides real-time visibility into the underlying Kubernetes infrastructure.
+
+<img width="1917" height="844" alt="27-newrelic-infrastructure-monitoring-dashboard" src="https://github.com/user-attachments/assets/57b51e9c-b75e-4f2d-9fec-3c83b2a96864" />
+
+---
+
+## Node-Level Visibility
+
+Individual Kubernetes nodes can be inspected to analyze resource consumption and identify potential bottlenecks.
+
+Metrics include:
+
+- CPU usage
+- Memory utilization
+- Network activity
+- Process information
+- System health indicators
+
+<img width="1904" height="848" alt="29-aws-ec2-worker-node-details" src="https://github.com/user-attachments/assets/aa48265e-c856-4e44-9a33-f8b6ab00cab4" />
+
+---
+
+## Centralized Log Aggregation
+
+In addition to infrastructure metrics, New Relic automatically collects container logs from Kubernetes workloads and forwards them to a centralized logging platform.
+
+This enables:
+
+- Real-time log monitoring
+- Application troubleshooting
+- Error investigation
+- Log searching and filtering
+- Correlation between logs and infrastructure metrics
+
+<img width="1902" height="652" alt="26-newrelic-log-ingestion-dashboard" src="https://github.com/user-attachments/assets/a530a1dd-0218-4778-afab-1b1f984f20cd" />
+
+---
+
+## Outcome
+
+The New Relic integration provides complete visibility across the Kubernetes environment:
+
+- Centralized monitoring for cluster resources
+- Real-time infrastructure and workload metrics
+- Automated log collection and analysis
+- Node and pod-level observability
+- Faster troubleshooting and operational insights
+
+This monitoring layer ensures the platform remains observable, maintainable, and production-ready as workloads scale across the cluster.
 
 
 
