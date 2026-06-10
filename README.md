@@ -777,3 +777,171 @@ The New Relic integration provides complete visibility across the Kubernetes env
 - Faster troubleshooting and operational insights
 
 This monitoring layer ensures the platform remains observable, maintainable, and production-ready as workloads scale across the cluster.
+
+---
+
+# 🔄 Step 7: GitOps Continuous Delivery with ArgoCD
+
+To automate application deployments and eliminate manual Kubernetes operations, the platform uses **ArgoCD** as the GitOps engine. All Kubernetes manifests are stored in a Git repository, making Git the single source of truth for the entire cluster.
+
+Whenever a change is pushed to the repository, ArgoCD automatically detects the update and synchronizes the cluster state with the desired configuration defined in Git.
+
+This provides:
+
+- Automated deployments
+- Continuous synchronization
+- Drift detection and self-healing
+- Version-controlled infrastructure
+- Zero manual `kubectl apply` operations
+
+---
+
+## ArgoCD Deployment
+
+ArgoCD was deployed inside the Kubernetes cluster and exposed securely through an NGINX Ingress Controller using a custom domain and TLS certificate issued by Cert-Manager.
+
+### ArgoCD Ingress Configuration
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: argocd-ingress
+  namespace: argocd
+
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
+spec:
+  ingressClassName: nginx
+
+  tls:
+  - hosts:
+      - argocd-pakshya.mooo.com
+    secretName: argocd-tls
+
+  rules:
+  - host: argocd-pakshya.mooo.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80
+```
+
+### Secure ArgoCD Access
+
+The ArgoCD dashboard is accessible through HTTPS using a certificate automatically managed by Cert-Manager.
+
+<img width="828" height="423" alt="01-argocd-https-certificate" src="https://github.com/user-attachments/assets/85466481-c219-4f8f-acbd-657b858b93a8" />
+
+---
+
+## Application Management
+
+ArgoCD continuously monitors the Kubernetes manifests stored in Git and tracks the health and synchronization status of all application resources.
+
+The resource tree below shows the complete dependency graph of the production application, including deployments, services, ingress resources, and supporting Kubernetes objects.
+
+<img width="1891" height="916" alt="14-argocd-application-resource-tree" src="https://github.com/user-attachments/assets/3f0a8f93-918e-45d4-8221-3613e15570a4" />
+
+---
+
+## Production Application Synchronization
+
+Once deployed, ArgoCD continuously reconciles the cluster state against the Git repository.
+
+The dashboard below shows the production application in a healthy and synchronized state.
+
+<img width="842" height="738" alt="44-argocd-synced-production-application" src="https://github.com/user-attachments/assets/127acb22-ca56-41b6-b099-4cc6cd72546a" />
+
+---
+
+## GitOps Deployment Demonstration
+
+To validate the GitOps workflow, the frontend deployment manifest was intentionally modified in the Git repository.
+
+The container image was changed from:
+
+```yaml
+image: parikshit1212/frontend
+```
+
+to:
+
+```yaml
+image: nginx:latest
+```
+
+After committing and pushing the updated manifest to GitHub, **no manual deployment commands were executed**.
+
+ArgoCD automatically:
+
+1. Detected the change in the repository.
+2. Marked the application as OutOfSync.
+3. Applied the updated deployment manifest.
+4. Performed a rolling update of the frontend pods.
+5. Restored the cluster to the desired state defined in Git.
+
+When the application was refreshed, the frontend was replaced with the default NGINX welcome page, confirming that the deployment had been updated entirely through the GitOps pipeline.
+
+<img width="837" height="366" alt="06-frontend-ui-updated-via-gitops" src="https://github.com/user-attachments/assets/0946cb4e-fb84-4395-935c-131596b8ec12" />
+
+---
+
+## Benefits of the GitOps Workflow
+
+- Git serves as the single source of truth.
+- Infrastructure changes are version-controlled.
+- Automated deployments reduce operational overhead.
+- Configuration drift is automatically detected.
+- Applications can self-heal when unexpected changes occur.
+- Rollbacks become simple Git commits.
+
+---
+
+## Outcome
+
+At this stage, the platform operates using a fully automated GitOps workflow:
+
+- ArgoCD continuously monitors Git repositories.
+- Kubernetes manifests are deployed automatically.
+- Changes are propagated without manual intervention.
+- Cluster state remains synchronized with Git.
+- Deployments are auditable, repeatable, and reliable.
+
+This approach ensures consistent and predictable application delivery while significantly simplifying Kubernetes operations.
+
+
+<img width="1024" height="416" alt="8cd50c24-5e21-4935-941b-203a4dd2c795" src="https://github.com/user-attachments/assets/ce5db072-97db-4270-a6d5-d182919d0575" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
